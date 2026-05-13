@@ -48,7 +48,7 @@ services:
       context: .
       dockerfile: services/auth-service/Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       AUTH_SERVICE_PORT: 3001
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -75,7 +75,7 @@ services:
       context: .
       dockerfile: services/users-service/Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       USERS_SERVICE_PORT: 3002
       JWT_SECRET: ${JWT_SECRET}
       SQLSERVER_HOST: sqlserver
