@@ -1,0 +1,49 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Compilación TypeScript
+dist/
+**/dist/
+build/
+**/build/
+*.tsbuildinfo
+
+# Variables de entorno (NUNCA subir al repo)
+.env
+**/.env
+.env.local
+.env.*.local
+
+# Cobertura de tests
+coverage/
+**/coverage/
+junit.xml
+**/junit.xml
+
+# Logs
+*.log
+logs/
+**/logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# ==============================
+# DOCUMENTO DE APRENDIZAJE — PRIVADO
+# Notas de entrevista y aprendizaje personal
+# NO SUBIR AL REPOSITORIO
+# ==============================
+docs/LEARNING.md
+LEARNING.md
+
+# ==============================
+# CLAUDE CODE — Skills personalizadas (no subir por ahora)
+# ==============================
+.claude/skills/
+skills-lock.json

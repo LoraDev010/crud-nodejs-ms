@@ -1,0 +1,131 @@
+networks:
+  crud-net:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  mongodb-data:
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: ${SQLSERVER_PASSWORD}
+      ACCEPT_EULA: 'Y'
+      MSSQL_PID: Express
+    ports:
+      - '1433:1433'
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - crud-net
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" -No']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  mongodb:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - crud-net
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.adminCommand("ping")']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    environment:
+      NODE_ENV: production
+      AUTH_SERVICE_PORT: 3001
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      SQLSERVER_HOST: sqlserver
+      SQLSERVER_PORT: 1433
+      SQLSERVER_USER: sa
+      SQLSERVER_PASSWORD: ${SQLSERVER_PASSWORD}
+      SQLSERVER_DATABASE: ${SQLSERVER_DATABASE}
+    networks:
+      - crud-net
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  users-service:
+    build:
+      context: .
+      dockerfile: services/users-service/Dockerfile
+    environment:
+      NODE_ENV: production
+      USERS_SERVICE_PORT: 3002
+      JWT_SECRET: ${JWT_SECRET}
+      SQLSERVER_HOST: sqlserver
+      SQLSERVER_PORT: 1433
+      SQLSERVER_USER: sa
+      SQLSERVER_PASSWORD: ${SQLSERVER_PASSWORD}
+      SQLSERVER_DATABASE: ${SQLSERVER_DATABASE}
+    networks:
+      - crud-net
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3002/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  products-service:
+    build:
+      context: .
+      dockerfile: services/products-service/Dockerfile
+    environment:
+      NODE_ENV: production
+      PRODUCTS_SERVICE_PORT: 3003
+      JWT_SECRET: ${JWT_SECRET}
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+    networks:
+      - crud-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3003/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+    networks:
+      - crud-net
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+      products-service:
+        condition: service_healthy

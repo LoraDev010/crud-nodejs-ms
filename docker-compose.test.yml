@@ -1,0 +1,46 @@
+version: '3.9'
+
+# Override para entorno de pruebas — usar con:
+# docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+
+networks:
+  crud-net:
+    driver: bridge
+
+services:
+  sqlserver:
+    environment:
+      SA_PASSWORD: TestPass123!
+      SQL_DATABASE: crud_test
+    ports:
+      - '1434:1433'
+
+  mongodb:
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: testuser
+      MONGO_INITDB_ROOT_PASSWORD: testpass
+    ports:
+      - '27018:27017'
+
+  auth-service:
+    environment:
+      NODE_ENV: test
+      JWT_SECRET: test-secret-min-32-chars-xxxxxxxxxx
+      JWT_REFRESH_SECRET: test-refresh-secret-min-32-chars-xx
+      SQL_HOST: sqlserver
+      SQL_PASSWORD: TestPass123!
+      SQL_DATABASE: crud_test
+
+  users-service:
+    environment:
+      NODE_ENV: test
+      JWT_SECRET: test-secret-min-32-chars-xxxxxxxxxx
+      SQL_HOST: sqlserver
+      SQL_PASSWORD: TestPass123!
+      SQL_DATABASE: crud_test
+
+  products-service:
+    environment:
+      NODE_ENV: test
+      JWT_SECRET: test-secret-min-32-chars-xxxxxxxxxx
+      MONGODB_URI: mongodb://testuser:testpass@mongodb:27018/crud_test?authSource=admin
