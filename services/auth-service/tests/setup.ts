@@ -1,0 +1,10 @@
+process.env['NODE_ENV'] = 'test';
+process.env['JWT_SECRET'] = 'test-jwt-secret-minimum-32-characters-ok';
+process.env['JWT_REFRESH_SECRET'] = 'test-refresh-secret-minimum-32-chars-ok';
+process.env['JWT_EXPIRES_IN'] = '15m';
+process.env['JWT_REFRESH_EXPIRES_IN'] = '7d';
+process.env['SQLSERVER_HOST'] = 'localhost';
+process.env['SQLSERVER_PORT'] = '1433';
+process.env['SQLSERVER_DATABASE'] = 'test_db';
+process.env['SQLSERVER_USER'] = 'sa';
+process.env['SQLSERVER_PASSWORD'] = 'TestPassword123!';
