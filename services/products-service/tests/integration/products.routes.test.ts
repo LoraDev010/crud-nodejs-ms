@@ -2,12 +2,13 @@ import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createApp } from '../../src/app';
-import * as authMiddleware from '../../src/middlewares/auth.middleware';
+
+jest.mock('../../src/middlewares/auth.middleware', () => ({
+  authMiddleware: jest.fn((_req: unknown, _res: unknown, next: () => void) => next()),
+}));
 
 let mongod: MongoMemoryServer;
 const app = createApp();
-
-jest.spyOn(authMiddleware, 'authMiddleware').mockImplementation((_req, _res, next) => next());
 
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create();

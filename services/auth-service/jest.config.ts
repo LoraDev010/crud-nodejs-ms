@@ -5,6 +5,7 @@ const config: Config = {
   testEnvironment: 'node',
   rootDir: '.',
   testMatch: ['**/tests/**/*.test.ts'],
+  setupFiles: ['<rootDir>/tests/setup.ts'],
   moduleNameMapper: {
     '^@crud-ms/shared$': '<rootDir>/../../shared/src/index.ts',
   },

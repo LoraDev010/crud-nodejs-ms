@@ -4,7 +4,6 @@ import {
   getAllProducts,
   getProductById,
   createProduct,
-  updateProduct,
   deleteProduct,
 } from '../../src/services/products.service';
 

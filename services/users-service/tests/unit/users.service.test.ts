@@ -1,4 +1,4 @@
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from '../../src/services/users.service';
+import { getAllUsers, getUserById, createUser, deleteUser } from '../../src/services/users.service';
 import { AppDataSource } from '../../src/config/database';
 
 jest.mock('../../src/config/database', () => ({

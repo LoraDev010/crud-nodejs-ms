@@ -1,15 +1,15 @@
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import * as usersService from '../../src/services/users.service';
-import * as authMiddleware from '../../src/middlewares/auth.middleware';
 
 jest.mock('../../src/services/users.service');
 jest.mock('../../src/config/database', () => ({
   AppDataSource: { getRepository: jest.fn(), initialize: jest.fn() },
   initDatabase: jest.fn(),
 }));
-// Bypass auth en tests de integración
-jest.spyOn(authMiddleware, 'authMiddleware').mockImplementation((_req, _res, next) => next());
+jest.mock('../../src/middlewares/auth.middleware', () => ({
+  authMiddleware: jest.fn((_req: unknown, _res: unknown, next: () => void) => next()),
+}));
 
 const app = createApp();
 
@@ -30,7 +30,7 @@ describe('POST /api/users', () => {
     const fakeUser = { id: '2', email: 'b@b.com', name: 'B' };
     (usersService.createUser as jest.Mock).mockResolvedValue(fakeUser);
 
-    const res = await request(app).post('/api/users').send({ email: 'b@b.com', name: 'B' });
+    const res = await request(app).post('/api/users').send({ email: 'b@b.com', name: 'Bob' });
     expect(res.status).toBe(201);
   });
 
